@@ -14,6 +14,7 @@ namespace BilleteraApp.Models
         public DbSet<Gasto> Gastos { get; set; }
         public DbSet<Categoria> Categorias { get; set; }
         public DbSet<HistorialSaldo> HistorialSaldos { get; set; }
+        public DbSet<CategoriaBase> CategoriasBase { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,7 +25,7 @@ namespace BilleteraApp.Models
                 .HasOne(u => u.Saldo)
                 .WithOne(s => s.Usuario)
                 .HasForeignKey<Saldo>(s => s.UsuarioId)
-                .OnDelete(DeleteBehavior.Cascade); 
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Usuario — Gastos (1:N)
             modelBuilder.Entity<Usuario>()
@@ -40,6 +41,13 @@ namespace BilleteraApp.Models
                 .HasForeignKey(c => c.UsuarioId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Categoria — Gastos (1:N)
+            modelBuilder.Entity<Categoria>()
+                .HasMany(c => c.Gastos)
+                .WithOne(g => g.Categoria)
+                .HasForeignKey(g => g.CategoriaId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             // Usuario — HistorialSaldo (1:N)
             modelBuilder.Entity<Usuario>()
                 .HasMany(u => u.HistorialSaldos)
@@ -47,12 +55,21 @@ namespace BilleteraApp.Models
                 .HasForeignKey(h => h.UsuarioId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Categoria — Gastos (1:N)
+            // Tabla de plantillas base: CategoriaBase
+            modelBuilder.Entity<CategoriaBase>().HasData(
+                new CategoriaBase { Id = 1, Nombre = "Comida" },
+                new CategoriaBase { Id = 2, Nombre = "Transporte" },
+                new CategoriaBase { Id = 3, Nombre = "Ocio" },
+                new CategoriaBase { Id = 4, Nombre = "Servicios" }
+            );
+
+            // ⚡ RELACIÓN LÓGICA: Categoria puede tener FK opcional a CategoriaBase
+            // Esto NO es obligatorio para clonar, pero documenta el origen
             modelBuilder.Entity<Categoria>()
-                .HasMany(c => c.Gastos)
-                .WithOne(g => g.Categoria)
-                .HasForeignKey(g => g.CategoriaId)
-                .OnDelete(DeleteBehavior.Restrict); 
+                .HasOne<CategoriaBase>() // Sin propiedad de navegación porque es opcional
+                .WithMany()
+                .HasForeignKey("CategoriaBaseId") // Shadow Property
+                .OnDelete(DeleteBehavior.Restrict);
         }
 
 

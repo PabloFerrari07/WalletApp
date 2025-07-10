@@ -1,6 +1,6 @@
 ﻿namespace BilleteraApp.Dtos
 {
-    public class HistorialSaldo
+    public class HistorialSaldoDto
     {
         public decimal Monto { get; set; }
         public DateTime Fecha { get; set; }

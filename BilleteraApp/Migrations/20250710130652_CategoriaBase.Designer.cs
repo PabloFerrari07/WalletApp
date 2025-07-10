@@ -4,6 +4,7 @@ using BilleteraApp.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BilleteraApp.Migrations
 {
     [DbContext(typeof(BilleteraContext))]
-    partial class BilleteraContextModelSnapshot : ModelSnapshot
+    [Migration("20250710130652_CategoriaBase")]
+    partial class CategoriaBase
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -30,9 +33,6 @@ namespace BilleteraApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("CategoriaBaseId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -41,8 +41,6 @@ namespace BilleteraApp.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("CategoriaBaseId");
 
                     b.HasIndex("UsuarioId");
 
@@ -201,11 +199,6 @@ namespace BilleteraApp.Migrations
 
             modelBuilder.Entity("BilleteraApp.Models.Categoria", b =>
                 {
-                    b.HasOne("BilleteraApp.Models.CategoriaBase", null)
-                        .WithMany()
-                        .HasForeignKey("CategoriaBaseId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("BilleteraApp.Models.Usuario", "Usuario")
                         .WithMany("Categorias")
                         .HasForeignKey("UsuarioId")
