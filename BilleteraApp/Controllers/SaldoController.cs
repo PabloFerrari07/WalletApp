@@ -21,8 +21,7 @@ namespace BilleteraApp.Controllers
         }
 
         [Authorize]
-        [HttpPost]
-        [Route("CargarSaldo")]
+        [HttpPost("CargarSaldo")]
         public async Task<ActionResult<SaldoDto>> CargarSaldo(SaldoDto dto)
         {
             // ✅ Sacar el ID del token (claim)
@@ -78,13 +77,31 @@ namespace BilleteraApp.Controllers
         }
 
 
-        /*
-        [HttpGet]
-        [Route("ObtenerSaldo")]
+        [Authorize]
+        [HttpGet("ObtenerSaldo")]
+        public async Task<ActionResult<SaldoDto>> ObtenerSaldo()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-        public async Task<IEnumerable<SaldoDto>> ObtenerSaldo() => await _billeteraContext.Saldos.Select
-            (b => new SaldoDto { FechaActualizacion=b.FechaActualizacion, MontoActual=b.MontoActual ,UsuarioId = b.UsuarioId}).ToListAsync();
+            var saldo = await _billeteraContext.Saldos
+                .FirstOrDefaultAsync(s => s.UsuarioId == userId);
 
-        */
+            if (saldo == null)
+            {
+                return NotFound("No hay saldo registrado.");
+            }
+
+            var saldoDto = new SaldoDto
+            {
+                MontoActual = saldo.MontoActual,
+                FechaActualizacion = saldo.FechaActualizacion
+            };
+
+            return Ok(saldoDto);
+        }
+
+
+
+
     }
 }
