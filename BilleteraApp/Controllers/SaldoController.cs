@@ -76,6 +76,33 @@ namespace BilleteraApp.Controllers
             return Ok(saldoActualizado);
         }
 
+        [Authorize]
+        [HttpPut("ActualizarSaldo")]
+        public async Task<ActionResult<SaldoDto>>ActualizarSaldo(SaldoDto dto)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            var saldo = await _billeteraContext.Saldos.FirstOrDefaultAsync(s => s.UsuarioId == userId);
+
+            if(saldo == null) {
+                return NotFound("No se encontro saldo para actualizar");
+            }
+
+
+            saldo.MontoActual = dto.MontoActual;
+            saldo.FechaActualizacion = DateTime.UtcNow;
+
+            await _billeteraContext.SaveChangesAsync();
+
+            var saldoDto = new SaldoDto
+            {
+                MontoActual = saldo.MontoActual,
+                FechaActualizacion = saldo.FechaActualizacion
+            };
+
+            return Ok(saldoDto);
+        }
+
 
         [Authorize]
         [HttpGet("ObtenerSaldo")]
@@ -100,6 +127,24 @@ namespace BilleteraApp.Controllers
             return Ok(saldoDto);
         }
 
+        [Authorize]
+        [HttpDelete("EliminarSaldo")]
+        public async Task<IActionResult> EliminarSaldo()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            var saldo = await _billeteraContext.Saldos.FirstOrDefaultAsync(s => s.UsuarioId == userId);
+
+            if (saldo == null)
+            {
+                return NotFound("No se encontro saldo para actualizar");
+            }
+
+            _billeteraContext.Saldos.Remove(saldo);
+            await _billeteraContext.SaveChangesAsync();
+
+            return Ok("Saldo eliminado correctamente.");
+        }
 
 
 
