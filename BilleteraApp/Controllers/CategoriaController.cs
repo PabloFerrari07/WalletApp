@@ -25,7 +25,7 @@ namespace BilleteraApp.Controllers
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             var categorias = await _billeteraContext.Categorias
                                                         .Where(c => c.UsuarioId == userId)
-                                                        .Select(c => new CategoriaDto { Nombre = c.Nombre })
+                                                        .Select(c => new CategoriaDto { Nombre = c.Nombre, Id = c.Id})
                                                         .ToListAsync();
 
             return Ok(categorias);

@@ -16,10 +16,32 @@ namespace BilleteraApp.Controllers
         public GastoController(BilleteraContext billeteraContext) {
             _billeteraContext = billeteraContext;
         }
+        [Authorize]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<GastoDto>>> ObtenerGastos()
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
+            var gastos = await _billeteraContext.Gastos
+                                                .Where(g => g.UsuarioId == userId)
+                                                .Include(g => g.Categoria)
+                                                .OrderByDescending(g => g.Fecha)
+                                                .ToListAsync();
+
+            var gastosDto = gastos.Select(g => new GastoDto
+            {
+                Id = g.Id,
+                Monto = g.Monto,
+                Fecha = g.Fecha,
+                Descripcion = g.Descripcion,
+                CategoriaId = g.CategoriaId,
+                CategoriaNombre = g.Categoria?.Nombre
+            });
+
+            return Ok(gastosDto);
+        }
         [Authorize]
         [HttpPost("RegistrarGasto")]
-
         public async Task<ActionResult<SaldoDto>> RegistrarGasto(GastoDto dto)
         {
        
@@ -85,6 +107,59 @@ namespace BilleteraApp.Controllers
             };
 
             return Ok(saldoActualizado);
+        }
+        [Authorize]
+        [HttpPut("ActualizarGasto/{id}")]
+        public async Task<IActionResult>ActualizarGasto(int id,GastoDto dto)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            var gasto = await _billeteraContext.Gastos
+                .FirstOrDefaultAsync(g => g.Id == id && g.UsuarioId == userId);
+
+            if (gasto == null)
+            {
+                return NotFound("No se encontró el gasto.");
+            }
+
+            var categoria = await _billeteraContext.Categorias.FirstOrDefaultAsync(c => c.Id == dto.CategoriaId && c.UsuarioId == userId);
+
+
+            if(categoria == null)
+            {
+                return BadRequest("Categoria no encontrada o no pertenece a tu cuenta.");
+            }
+
+
+            gasto.Monto = dto.Monto;
+            gasto.Descripcion = dto.Descripcion;
+            gasto.CategoriaId = dto.CategoriaId;
+            gasto.Fecha = DateTime.UtcNow;
+
+            await _billeteraContext.SaveChangesAsync();
+
+            return Ok("Gasto actualizado correctamente.");
+        }
+
+        [Authorize]
+        [HttpDelete("EliminarGasto/{id}")]
+        public async Task<IActionResult> EliminarGasto(int id)
+        {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+
+            var gasto = await _billeteraContext.Gastos
+                .FirstOrDefaultAsync(g => g.Id == id && g.UsuarioId == userId);
+
+            if (gasto == null)
+            {
+                return NotFound("No se encontró el gasto.");
+            }
+
+            _billeteraContext.Gastos.Remove(gasto);
+
+            await _billeteraContext.SaveChangesAsync();
+
+            return Ok("Gasto eliminado correctamente.");
         }
 
     }
