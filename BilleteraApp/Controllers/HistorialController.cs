@@ -1,5 +1,6 @@
 ﻿using BilleteraApp.Dtos;
 using BilleteraApp.Models;
+using BilleteraApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,9 +13,9 @@ namespace BilleteraApp.Controllers
     [ApiController]
     public class HistorialController : ControllerBase
     {
-        private readonly BilleteraContext _billeteraContext;
-        public HistorialController(BilleteraContext billeteraContext) {
-            _billeteraContext = billeteraContext;
+        private readonly IHistorialService _historialService;
+        public HistorialController(IHistorialService historialService) {
+            _historialService = historialService;
         }
 
         [Authorize]
@@ -23,18 +24,9 @@ namespace BilleteraApp.Controllers
         {
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
 
-            var historial = await _billeteraContext.HistorialSaldos
-                .Where(h => h.UsuarioId == userId)
-                .OrderByDescending(h => h.Fecha).ToListAsync();
+            var historial = await _historialService.ObtenerHistorialAsync(userId);
 
-            var historialDto = historial.Select(h => new HistorialSaldoDto
-            {
-                Monto = h.Monto,
-                Fecha = h.Fecha,
-                Tipo = h.Tipo
-            });
-
-            return Ok(historialDto);
+            return Ok(historial);
         }
     }
 }

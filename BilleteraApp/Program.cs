@@ -39,6 +39,8 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISaldoService, SaldoService>();
+builder.Services.AddScoped<IGastoService, GastoService>();
+builder.Services.AddScoped<IHistorialService, HistorialService>();
 builder.Services.AddScoped<JwtService>();
 var app = builder.Build();
 
