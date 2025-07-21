@@ -18,18 +18,14 @@ namespace BilleteraApp.Services
         {
             var saldo = await _billeteraContext.Saldos.FirstOrDefaultAsync(s => s.UsuarioId == userId);
 
-            if (saldo == null) return null;
+            if (saldo == null) throw new Exception("No se encontró saldo.");
 
             saldo.MontoActual = dto.MontoActual;
             saldo.FechaActualizacion = DateTime.UtcNow;
 
             await _billeteraContext.SaveChangesAsync();
 
-            return new SaldoDto
-            {
-                MontoActual = saldo.MontoActual,
-                FechaActualizacion = saldo.FechaActualizacion
-            };
+            return GenerarSaldoDto(saldo);
         }
 
         public async Task<SaldoDto> CargarSaldoAsync(int userId, SaldoDto dto)
@@ -38,13 +34,12 @@ namespace BilleteraApp.Services
 
             if (saldo == null)
             {
-                saldo = new Saldo   
+                saldo = new Saldo
                 {
                     UsuarioId = userId,
                     MontoActual = dto.MontoActual,
                     FechaActualizacion = DateTime.UtcNow
                 };
-
                 _billeteraContext.Saldos.Add(saldo);
             }
             else
@@ -53,24 +48,17 @@ namespace BilleteraApp.Services
                 saldo.FechaActualizacion = DateTime.UtcNow;
             }
 
-            // Registrar historial
-            var historial = new HistorialSaldo
+            _billeteraContext.HistorialSaldos.Add(new HistorialSaldo
             {
                 UsuarioId = userId,
                 Monto = dto.MontoActual,
                 Fecha = DateTime.UtcNow,
                 Tipo = "Ingreso"
-            };
-
-            _billeteraContext.HistorialSaldos.Add(historial);
+            });
 
             await _billeteraContext.SaveChangesAsync();
 
-            return new SaldoDto
-            {
-                MontoActual = saldo.MontoActual,
-                FechaActualizacion = saldo.FechaActualizacion
-            };
+            return GenerarSaldoDto(saldo);
         }
 
         public async Task<bool> EliminarSaldoAsync(int userId)
@@ -89,13 +77,27 @@ namespace BilleteraApp.Services
         {
             var saldo = await _billeteraContext.Saldos.FirstOrDefaultAsync(s => s.UsuarioId == userId);
 
-            if (saldo == null) return null;
+            if (saldo == null) throw new Exception("No hay saldo registrado.");
 
-            return new SaldoDto
+            return GenerarSaldoDto(saldo);
+        }
+
+
+        private SaldoDto GenerarSaldoDto(Saldo saldo)
+        {
+            var dto = new SaldoDto
             {
                 MontoActual = saldo.MontoActual,
                 FechaActualizacion = saldo.FechaActualizacion
             };
+
+            if (saldo.MontoActual < 500)
+            {
+                dto.SaldoBajo = true;
+                dto.Alerta = "⚠️ ¡Atención! Tu saldo es muy bajo.";
+            }
+
+            return dto;
         }
     }
 }

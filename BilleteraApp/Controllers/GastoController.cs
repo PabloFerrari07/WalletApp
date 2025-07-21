@@ -13,10 +13,8 @@ namespace BilleteraApp.Controllers
     [ApiController]
     public class GastoController : ControllerBase
     {
-        private readonly BilleteraContext _billeteraContext;
         private readonly IGastoService _gastoService;
-        public GastoController(BilleteraContext billeteraContext, IGastoService gastoService) {
-            _billeteraContext = billeteraContext;
+        public GastoController( IGastoService gastoService) {
             _gastoService = gastoService;
         }
 
