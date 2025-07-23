@@ -1,5 +1,8 @@
+using BilleteraApp.Dtos;
 using BilleteraApp.Models;
 using BilleteraApp.Services;
+using BilleteraApp.Validators;
+using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -22,6 +25,7 @@ builder.Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
+//jwt
 .AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -36,14 +40,22 @@ builder.Services.AddAuthentication(options =>
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
     };
 });
-
+//servicios
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISaldoService, SaldoService>();
 builder.Services.AddScoped<IGastoService, GastoService>();
 builder.Services.AddScoped<IHistorialService, HistorialService>();
 builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddHttpClient<ICurrencyService, ExchangeRateService>();
+
+//validators
+builder.Services.AddScoped<IValidator<SaldoDto>, SaldoDtoValidator>();
 var app = builder.Build();
+
+
+
+
 
 app.UseAuthentication();
 app.UseAuthorization();

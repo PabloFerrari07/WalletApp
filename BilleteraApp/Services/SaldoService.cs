@@ -6,11 +6,12 @@ namespace BilleteraApp.Services
 {
     public class SaldoService : ISaldoService
     {
-
+        private readonly ICurrencyService _currencyService;
         private readonly BilleteraContext _billeteraContext;
-        public SaldoService(BilleteraContext billeteraContext)
+        public SaldoService(BilleteraContext billeteraContext, ICurrencyService currencyService)
         {
             _billeteraContext = billeteraContext;
+            _currencyService = currencyService;
         }
 
 
@@ -98,6 +99,25 @@ namespace BilleteraApp.Services
             }
 
             return dto;
+        }
+
+        public async Task<SaldoResumenDto> ObtenerResumenMultiMonedaAsync(int userId, string toCurrency)
+        {
+            var saldo = await _billeteraContext.Saldos.FirstOrDefaultAsync(s => s.UsuarioId ==userId);
+
+            if (saldo == null) throw new Exception("No hay saldo registrado.");
+
+            var tasa = await _currencyService.ObtenerTipoCambioAsync("ARS", toCurrency.ToUpper());
+
+            return new SaldoResumenDto
+            {
+                Saldo = saldo.MontoActual,
+                MonedaLocal = "ARS",
+                ConvertidoA = toCurrency.ToUpper(),
+                Tasa = tasa,
+                SaldoConvertido = saldo.MontoActual * tasa,
+                FechaActualizacion = saldo.FechaActualizacion
+            };
         }
     }
 }

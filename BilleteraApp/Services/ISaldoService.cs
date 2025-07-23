@@ -8,5 +8,8 @@ namespace BilleteraApp.Services
         Task<SaldoDto> ObtenerSaldoAsync(int userId);
         Task<SaldoDto> ActualizarSaldoAsync(int userId, SaldoDto dto);
         Task<bool> EliminarSaldoAsync(int userId);
+
+        Task<SaldoResumenDto> ObtenerResumenMultiMonedaAsync(int userId, string toCurrency);
+
     }
 }
