@@ -34,15 +34,28 @@ namespace BilleteraApp.Services
 
         public async Task<bool> EliminarGastoAsync(int userId, int gastoId)
         {
-            var gasto = await _billeteraContext.Gastos.FirstOrDefaultAsync(g => g.Id == gastoId && g.UsuarioId == userId);
+            var gasto = await _billeteraContext.Gastos
+                .FirstOrDefaultAsync(g => g.Id == gastoId && g.UsuarioId == userId);
 
             if (gasto == null)
                 return false;
 
+            // Buscar el saldo actual del usuario
+            var saldo = await _billeteraContext.Saldos
+                .FirstOrDefaultAsync(s => s.UsuarioId == userId);
+
+            if (saldo != null)
+            {
+                // Sumar el monto del gasto al saldo actual
+                saldo.MontoActual += gasto.Monto;
+            }
+
+            // Eliminar el gasto
             _billeteraContext.Gastos.Remove(gasto);
             await _billeteraContext.SaveChangesAsync();
             return true;
         }
+
 
         public async Task<IEnumerable<GastoDto>> ObtenerGastosAsync(int userId)
         {

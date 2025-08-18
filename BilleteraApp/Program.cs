@@ -16,7 +16,19 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-//Base de datos
+
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+// Base de datos
 builder.Services.AddDbContext<BilleteraContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -25,7 +37,7 @@ builder.Services.AddAuthentication(options =>
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-//jwt
+// JWT
 .AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
@@ -40,7 +52,8 @@ builder.Services.AddAuthentication(options =>
             Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
     };
 });
-//servicios
+
+// Servicios
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISaldoService, SaldoService>();
 builder.Services.AddScoped<IGastoService, GastoService>();
@@ -49,13 +62,10 @@ builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddHttpClient<ICurrencyService, ExchangeRateService>();
 
-//validators
+// Validators
 builder.Services.AddScoped<IValidator<SaldoDto>, SaldoDtoValidator>();
+
 var app = builder.Build();
-
-
-
-
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -68,6 +78,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// CORS
+app.UseCors();
 
 app.UseAuthorization();
 
