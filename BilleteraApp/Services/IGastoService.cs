@@ -8,5 +8,7 @@ namespace BilleteraApp.Services
         Task<SaldoDto> RegistrarGastoAsync(int userId, GastoDto dto);
         Task<bool> ActualizarGastoAsync(int userId, int gastoId, GastoDto dto);
         Task<bool> EliminarGastoAsync(int userId, int gastoId);
+
+        Task<IEnumerable<GastoEstadisticaDto>> ObtenerEstadisticasAsync(int userId, DateTime? desde = null, DateTime? hasta = null);
     }
 }

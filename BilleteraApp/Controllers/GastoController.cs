@@ -17,6 +17,16 @@ namespace BilleteraApp.Controllers
         public GastoController( IGastoService gastoService) {
             _gastoService = gastoService;
         }
+        [Authorize]
+        [HttpGet("estadisticas")]
+        public async Task<IActionResult> ObtenerEstadisticas(
+                    int userId,
+                    [FromQuery] DateTime? desde = null,
+                    [FromQuery] DateTime? hasta = null)
+        {
+            var estadisticas = await _gastoService.ObtenerEstadisticasAsync(userId, desde, hasta);
+            return Ok(estadisticas);
+        }
 
         [Authorize]
         [HttpGet]

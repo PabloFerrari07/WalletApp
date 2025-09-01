@@ -32,6 +32,27 @@ namespace BilleteraApp.Services
             return true;
         }
 
+        public async Task<IEnumerable<GastoEstadisticaDto>> ObtenerEstadisticasAsync(int userId, DateTime? desde = null, DateTime? hasta = null) {
+            var query = _billeteraContext.Gastos
+                                         .Where(g => g.UsuarioId == userId);
+
+            if (desde.HasValue) query = query.Where(g => g.Fecha.Date >= desde.Value.Date);
+
+            if(hasta.HasValue) query = query.Where(g=> g.Fecha.Date <= hasta.Value.Date);
+
+
+            var resultado = await query.GroupBy(g => g.Fecha.Date).Select(g => new GastoEstadisticaDto
+            {
+                Fecha = g.Key,
+                TotalGasto = g.Sum(x => x.Monto)
+            })
+                .OrderBy(e => e.Fecha)
+                .ToListAsync();
+
+
+            return resultado;
+        }
+
         public async Task<bool> EliminarGastoAsync(int userId, int gastoId)
         {
             var gasto = await _billeteraContext.Gastos
