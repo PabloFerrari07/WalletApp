@@ -32,26 +32,36 @@ namespace BilleteraApp.Services
             return true;
         }
 
-        public async Task<IEnumerable<GastoEstadisticaDto>> ObtenerEstadisticasAsync(int userId, DateTime? desde = null, DateTime? hasta = null) {
-            var query = _billeteraContext.Gastos
-                                         .Where(g => g.UsuarioId == userId);
+        public async Task<IEnumerable<GastoEstadisticaDto>> ObtenerEstadisticasAsync(int userId, DateTime? desde = null, DateTime? hasta = null)
+        {
+            var hoy = DateTime.UtcNow.Date;
+            var hace7Dias = hoy.AddDays(-6); // Incluye hoy y los 6 días anteriores
 
-            if (desde.HasValue) query = query.Where(g => g.Fecha.Date >= desde.Value.Date);
-
-            if(hasta.HasValue) query = query.Where(g=> g.Fecha.Date <= hasta.Value.Date);
-
-
-            var resultado = await query.GroupBy(g => g.Fecha.Date).Select(g => new GastoEstadisticaDto
-            {
-                Fecha = g.Key,
-                TotalGasto = g.Sum(x => x.Monto)
-            })
-                .OrderBy(e => e.Fecha)
+            // Traer los gastos del usuario en los últimos 7 días
+            var gastos = await _billeteraContext.Gastos
+                .Where(g => g.UsuarioId == userId && g.Fecha.Date >= hace7Dias && g.Fecha.Date <= hoy)
+                .GroupBy(g => g.Fecha.Date)
+                .Select(g => new GastoEstadisticaDto
+                {
+                    Fecha = g.Key,
+                    TotalGasto = g.Sum(x => x.Monto)
+                })
                 .ToListAsync();
 
+            // Rellenar días faltantes con 0
+            var resultado = Enumerable.Range(0, 7)
+                .Select(i => hace7Dias.AddDays(i))
+                .Select(dia => new GastoEstadisticaDto
+                {
+                    Fecha = dia,
+                    TotalGasto = gastos.FirstOrDefault(g => g.Fecha == dia)?.TotalGasto ?? 0
+                })
+                .OrderBy(r => r.Fecha)
+                .ToList();
 
             return resultado;
         }
+
 
         public async Task<bool> EliminarGastoAsync(int userId, int gastoId)
         {
@@ -141,6 +151,36 @@ namespace BilleteraApp.Services
             {
                 MontoActual = saldo.MontoActual,
                 FechaActualizacion = saldo.FechaActualizacion
+            };
+        }
+
+
+        public GastosEstadisticasDto CalcularEstadisticas(List<Gasto> gastos)
+        {
+            if (gastos == null || !gastos.Any())
+            {
+                return new GastosEstadisticasDto
+                {
+                    TotalGastado = 0,
+                    Promedio = 0,
+                    CategoriaMasGastada = "Sin datos"
+                };
+            }
+
+            var total = gastos.Sum(g => g.Monto);
+            var promedio = gastos.Average(g => g.Monto);
+
+            var categoriaMasGastada = gastos
+                .GroupBy(g => g.Categoria.Nombre) // usamos el nombre de la categoría
+                .Select(g => new { Categoria = g.Key, Total = g.Sum(x => x.Monto) })
+                .OrderByDescending(g => g.Total)
+                .First().Categoria;
+
+            return new GastosEstadisticasDto
+            {
+                TotalGastado = total,
+                Promedio = promedio,
+                CategoriaMasGastada = categoriaMasGastada
             };
         }
     }

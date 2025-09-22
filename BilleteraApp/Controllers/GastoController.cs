@@ -14,17 +14,33 @@ namespace BilleteraApp.Controllers
     public class GastoController : ControllerBase
     {
         private readonly IGastoService _gastoService;
-        public GastoController( IGastoService gastoService) {
+        private readonly BilleteraContext _billeteraContext;
+        public GastoController( IGastoService gastoService, BilleteraContext billeteraContext)
+        {
             _gastoService = gastoService;
+            _billeteraContext = billeteraContext;
         }
         [Authorize]
-        [HttpGet("estadisticas")]
-        public async Task<IActionResult> ObtenerEstadisticas(
-                    int userId,
-                    [FromQuery] DateTime? desde = null,
-                    [FromQuery] DateTime? hasta = null)
+        [HttpGet("{usuarioId}")]
+        public IActionResult GetEstadisticas(int usuarioId)
         {
-            var estadisticas = await _gastoService.ObtenerEstadisticasAsync(userId, desde, hasta);
+            var gastos = _billeteraContext.Gastos
+                .Include(g => g.Categoria)   // importante para acceder al nombre de la categoría
+                .Where(g => g.UsuarioId == usuarioId)
+                .ToList();
+
+            var estadisticas = _gastoService.CalcularEstadisticas(gastos);
+            return Ok(estadisticas);
+        }
+
+        [Authorize]
+        [HttpGet("estadisticas-semana")]
+        public async Task<IActionResult> ObtenerEstadisticasUltimos7Dias()
+        {
+            var userId = int.Parse(User.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
+
+            var estadisticas = await _gastoService.ObtenerEstadisticasAsync(userId);
+
             return Ok(estadisticas);
         }
 

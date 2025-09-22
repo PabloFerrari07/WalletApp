@@ -1,4 +1,5 @@
 ﻿using BilleteraApp.Dtos;
+using BilleteraApp.Models;
 
 namespace BilleteraApp.Services
 {
@@ -10,5 +11,7 @@ namespace BilleteraApp.Services
         Task<bool> EliminarGastoAsync(int userId, int gastoId);
 
         Task<IEnumerable<GastoEstadisticaDto>> ObtenerEstadisticasAsync(int userId, DateTime? desde = null, DateTime? hasta = null);
+
+        GastosEstadisticasDto CalcularEstadisticas(List<Gasto> gastos);
     }
 }
