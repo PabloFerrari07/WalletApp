@@ -21,11 +21,13 @@ namespace BilleteraApp.Controllers
             _billeteraContext = billeteraContext;
         }
         [Authorize]
-        [HttpGet("{usuarioId}")]
-        public IActionResult GetEstadisticas(int usuarioId)
+        [HttpGet("PromediarEstadisticas")]
+        public IActionResult GetEstadisticas()
         {
+            var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+
             var gastos = _billeteraContext.Gastos
-                .Include(g => g.Categoria)   // importante para acceder al nombre de la categoría
+                .Include(g => g.Categoria)
                 .Where(g => g.UsuarioId == usuarioId)
                 .ToList();
 
