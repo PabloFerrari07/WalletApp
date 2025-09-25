@@ -1,6 +1,7 @@
 ﻿using BilleteraApp.Dtos;
 using BilleteraApp.Models;
 using BilleteraApp.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +15,11 @@ namespace BilleteraApp.Controllers
     public class CategoriaController : ControllerBase
     {
         private readonly ICategoriaService _categoriaService;
-
-        public CategoriaController(ICategoriaService categoriaService)
+        private IValidator<CategoriaDto> _validator;
+        public CategoriaController(ICategoriaService categoriaService, IValidator<CategoriaDto> validator)
         {
             _categoriaService = categoriaService;
+            _validator = validator;
         }
 
         [Authorize]
@@ -33,6 +35,13 @@ namespace BilleteraApp.Controllers
         [HttpPost("agregarCategoria")]
         public async Task<ActionResult> CrearCategoria(CategoriaDto dto)
         {
+            var validationResult = await _validator.ValidateAsync(dto);
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             var result = await _categoriaService.CrearCategoria(userId, dto);
 

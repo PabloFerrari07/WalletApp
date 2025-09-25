@@ -163,25 +163,34 @@ namespace BilleteraApp.Services
                 {
                     TotalGastado = 0,
                     Promedio = 0,
-                    CategoriaMasGastada = "Sin datos"
+                    CategoriaMasGastada = "Sin datos",
+                    GastosPorCategoria = new List<GastoPorCategoriaDto>()
                 };
             }
 
             var total = gastos.Sum(g => g.Monto);
             var promedio = gastos.Average(g => g.Monto);
 
-            var categoriaMasGastada = gastos
-                .GroupBy(g => g.Categoria.Nombre) // usamos el nombre de la categoría
-                .Select(g => new { Categoria = g.Key, Total = g.Sum(x => x.Monto) })
+            var gastosPorCategoria = gastos
+                .GroupBy(g => g.Categoria.Nombre)
+                .Select(g => new GastoPorCategoriaDto
+                {
+                    Categoria = g.Key,
+                    Total = g.Sum(x => x.Monto)
+                })
                 .OrderByDescending(g => g.Total)
-                .First().Categoria;
+                .ToList();
+
+            var categoriaMasGastada = gastosPorCategoria.First().Categoria;
 
             return new GastosEstadisticasDto
             {
                 TotalGastado = total,
                 Promedio = promedio,
-                CategoriaMasGastada = categoriaMasGastada
+                CategoriaMasGastada = categoriaMasGastada,
+                GastosPorCategoria = gastosPorCategoria
             };
         }
+
     }
 }

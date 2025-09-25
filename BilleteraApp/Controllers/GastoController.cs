@@ -1,6 +1,7 @@
 ﻿using BilleteraApp.Dtos;
 using BilleteraApp.Models;
 using BilleteraApp.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,10 +16,13 @@ namespace BilleteraApp.Controllers
     {
         private readonly IGastoService _gastoService;
         private readonly BilleteraContext _billeteraContext;
-        public GastoController( IGastoService gastoService, BilleteraContext billeteraContext)
+
+        private IValidator<GastoDto> _validator;
+        public GastoController( IGastoService gastoService, BilleteraContext billeteraContext, IValidator<GastoDto> validator)
         {
             _gastoService = gastoService;
             _billeteraContext = billeteraContext;
+            _validator = validator;
         }
         [Authorize]
         [HttpGet("PromediarEstadisticas")]
@@ -58,6 +62,12 @@ namespace BilleteraApp.Controllers
         [HttpPost("RegistrarGasto")]
         public async Task<ActionResult<SaldoDto>> RegistrarGasto(GastoDto dto)
         {
+            var validationResult = await _validator.ValidateAsync(dto);
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
 
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             try
@@ -74,6 +84,13 @@ namespace BilleteraApp.Controllers
         [HttpPut("ActualizarGasto/{id}")]
         public async Task<IActionResult>ActualizarGasto(int id,GastoDto dto)
         {
+            var validationResult = await _validator.ValidateAsync(dto);
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(validationResult.Errors);
+            }
+
             var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value);
             try
             {

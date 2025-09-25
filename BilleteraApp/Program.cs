@@ -32,12 +32,23 @@ builder.Services.AddCors(options =>
 builder.Services.AddDbContext<BilleteraContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+//Validadores
+builder.Services.AddScoped<IValidator<GastoDto>, GastoDtoValidator>();
+builder.Services.AddScoped<IValidator<SaldoDto>, SaldoDtoValidator>();
+builder.Services.AddScoped<IValidator<LoginDto>, LoginDtoValidator>();
+builder.Services.AddScoped<IValidator<RegisterDto>, RegisterDtoValidator>();
+builder.Services.AddScoped<IValidator<CategoriaDto>, CategoriaDtoValidator>();
+
+
+
+// JWT
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-// JWT
+
+
 .AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
