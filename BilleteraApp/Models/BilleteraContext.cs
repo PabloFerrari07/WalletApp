@@ -9,12 +9,14 @@ namespace BilleteraApp.Models
         {
 
         }
+
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Saldo> Saldos { get; set; }
         public DbSet<Gasto> Gastos { get; set; }
         public DbSet<Categoria> Categorias { get; set; }
         public DbSet<HistorialSaldo> HistorialSaldos { get; set; }
         public DbSet<CategoriaBase> CategoriasBase { get; set; }
+        public DbSet<Recomendacion> Recomendaciones { get; set; } // 👈 Nuevo
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -55,6 +57,13 @@ namespace BilleteraApp.Models
                 .HasForeignKey(h => h.UsuarioId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // Usuario — Recomendaciones (1:N)
+            modelBuilder.Entity<Usuario>()
+                .HasMany(u => u.Recomendaciones)
+                .WithOne(r => r.Usuario)
+                .HasForeignKey(r => r.UsuarioId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // Tabla de plantillas base: CategoriaBase
             modelBuilder.Entity<CategoriaBase>().HasData(
                 new CategoriaBase { Id = 1, Nombre = "Comida" },
@@ -63,15 +72,13 @@ namespace BilleteraApp.Models
                 new CategoriaBase { Id = 4, Nombre = "Servicios" }
             );
 
-            // ⚡ RELACIÓN LÓGICA: Categoria puede tener FK opcional a CategoriaBase
-            // Esto NO es obligatorio para clonar, pero documenta el origen
+            // ⚡ Relación lógica: Categoria puede tener FK opcional a CategoriaBase
             modelBuilder.Entity<Categoria>()
-                .HasOne<CategoriaBase>() // Sin propiedad de navegación porque es opcional
+                .HasOne<CategoriaBase>()
                 .WithMany()
-                .HasForeignKey("CategoriaBaseId") // Shadow Property
+                .HasForeignKey("CategoriaBaseId")
                 .OnDelete(DeleteBehavior.Restrict);
         }
-
 
 
     }

@@ -69,6 +69,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISaldoService, SaldoService>();
 builder.Services.AddScoped<IGastoService, GastoService>();
+builder.Services.AddScoped<IRecomendacionService, RecomendacionService>();
 builder.Services.AddScoped<IHistorialService, HistorialService>();
 builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<JwtService>();

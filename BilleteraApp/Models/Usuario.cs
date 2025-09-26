@@ -11,5 +11,7 @@
         public List<Gasto> Gastos { get; set; }
         public List<Categoria> Categorias { get; set; }
         public List<HistorialSaldo> HistorialSaldos { get; set; }
+
+        public ICollection<Recomendacion> Recomendaciones { get; set; }
     }
 }
