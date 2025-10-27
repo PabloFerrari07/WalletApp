@@ -13,5 +13,7 @@
         public List<HistorialSaldo> HistorialSaldos { get; set; }
 
         public ICollection<Recomendacion> Recomendaciones { get; set; }
+
+        public ICollection<GastoIA> GastosIA { get; set; }
     }
 }

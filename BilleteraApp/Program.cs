@@ -74,7 +74,7 @@ builder.Services.AddScoped<IHistorialService, HistorialService>();
 builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<JwtService>();
 builder.Services.AddHttpClient<ICurrencyService, ExchangeRateService>();
-
+builder.Services.AddHttpClient<IIAService, IAService>();
 // Validators
 builder.Services.AddScoped<IValidator<SaldoDto>, SaldoDtoValidator>();
 

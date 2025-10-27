@@ -16,7 +16,8 @@ namespace BilleteraApp.Models
         public DbSet<Categoria> Categorias { get; set; }
         public DbSet<HistorialSaldo> HistorialSaldos { get; set; }
         public DbSet<CategoriaBase> CategoriasBase { get; set; }
-        public DbSet<Recomendacion> Recomendaciones { get; set; } // 👈 Nuevo
+        public DbSet<Recomendacion> Recomendaciones { get; set; }
+        public DbSet<GastoIA> GastosIA { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -78,7 +79,15 @@ namespace BilleteraApp.Models
                 .WithMany()
                 .HasForeignKey("CategoriaBaseId")
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Usuario>()
+                .HasMany(u => u.GastosIA)
+                .WithOne(g => g.Usuario)
+                .HasForeignKey(g => g.UsuarioId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
+
+
 
 
     }

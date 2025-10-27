@@ -4,6 +4,7 @@ using BilleteraApp.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BilleteraApp.Migrations
 {
     [DbContext(typeof(BilleteraContext))]
-    partial class BilleteraContextModelSnapshot : ModelSnapshot
+    [Migration("20251015125716_IaGasto")]
+    partial class IaGasto
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -119,38 +122,6 @@ namespace BilleteraApp.Migrations
                     b.HasIndex("UsuarioId");
 
                     b.ToTable("Gastos");
-                });
-
-            modelBuilder.Entity("BilleteraApp.Models.GastoIA", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Categoria")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Descripcion")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Fecha")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal>("Monto")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UsuarioId");
-
-                    b.ToTable("GastosIA");
                 });
 
             modelBuilder.Entity("BilleteraApp.Models.HistorialSaldo", b =>
@@ -294,17 +265,6 @@ namespace BilleteraApp.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("BilleteraApp.Models.GastoIA", b =>
-                {
-                    b.HasOne("BilleteraApp.Models.Usuario", "Usuario")
-                        .WithMany("GastosIA")
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Usuario");
-                });
-
             modelBuilder.Entity("BilleteraApp.Models.HistorialSaldo", b =>
                 {
                     b.HasOne("BilleteraApp.Models.Usuario", "Usuario")
@@ -348,8 +308,6 @@ namespace BilleteraApp.Migrations
                     b.Navigation("Categorias");
 
                     b.Navigation("Gastos");
-
-                    b.Navigation("GastosIA");
 
                     b.Navigation("HistorialSaldos");
 

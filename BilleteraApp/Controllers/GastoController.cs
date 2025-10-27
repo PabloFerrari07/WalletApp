@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Text.Json;
 
 namespace BilleteraApp.Controllers
 {
@@ -16,13 +17,15 @@ namespace BilleteraApp.Controllers
     {
         private readonly IGastoService _gastoService;
         private readonly BilleteraContext _billeteraContext;
+        private readonly IAService _iaService;
 
         private IValidator<GastoDto> _validator;
-        public GastoController( IGastoService gastoService, BilleteraContext billeteraContext, IValidator<GastoDto> validator)
+        public GastoController( IGastoService gastoService, BilleteraContext billeteraContext, IValidator<GastoDto> validator, IAService iaService)
         {
             _gastoService = gastoService;
             _billeteraContext = billeteraContext;
             _validator = validator;
+            _iaService = iaService;
         }
         [Authorize]
         [HttpGet("PromediarEstadisticas")]
